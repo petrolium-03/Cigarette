@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1a1a1a" />
+    <title>Cigarette Tracker</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>Cigarette Tracker</h1>
+      <button id="settings-btn" class="icon-btn" aria-label="Settings">⚙️</button>
+    </header>
+
+    <main>
+      <section class="today-card">
+        <div class="today-row">
+          <span class="today-label">Today</span>
+          <span class="today-count">
+            <span id="today-count">0</span>
+            <span class="today-sep"> / </span>
+            <span id="today-goal">10</span>
+          </span>
+        </div>
+        <div class="goal-track" aria-hidden="true">
+          <div id="goal-bar" class="goal-bar"></div>
+        </div>
+      </section>
+
+      <section class="action-card">
+        <button id="log-btn" class="log-btn" aria-label="Log a cigarette">
+          <span class="log-plus">+</span>
+          <span class="log-text">Log one</span>
+        </button>
+        <button id="undo-btn" class="undo-btn" disabled>
+          <span aria-hidden="true">↶</span>
+          <span id="undo-label">Nothing to undo</span>
+        </button>
+      </section>
+
+      <section class="stats-card">
+        <div class="range-tabs" role="tablist">
+          <button class="range-tab" role="tab" data-range="day">Day</button>
+          <button class="range-tab active" role="tab" data-range="week">Week</button>
+          <button class="range-tab" role="tab" data-range="month">Month</button>
+        </div>
+        <div class="range-summary">
+          <div>
+            <div class="range-title" id="range-title">Last 7 days</div>
+            <div class="range-numbers">
+              <span><strong id="range-total">0</strong> total</span>
+              <span><strong id="range-avg">0</strong> /day</span>
+              <span><strong id="streak">0</strong>d streak</span>
+            </div>
+          </div>
+        </div>
+        <canvas id="chart" class="chart"></canvas>
+      </section>
+
+      <section class="impact-card">
+        <div class="impact">
+          <span class="impact-emoji">💰</span>
+          <div>
+            <div class="impact-value" id="cost-saved">$0.00</div>
+            <div class="impact-label">saved vs baseline</div>
+          </div>
+        </div>
+        <div class="impact">
+          <span class="impact-emoji">🚭</span>
+          <div>
+            <div class="impact-value"><span id="cigs-avoided">0</span></div>
+            <div class="impact-label">cigs avoided</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="badges-card">
+        <h2>Badges</h2>
+        <div id="badges" class="badges"></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <dialog id="settings-dialog" class="settings-dialog">
+      <form id="settings-form" method="dialog">
+        <h2>Settings</h2>
+        <label>
+          Daily goal
+          <input id="f-goal" type="number" min="0" step="1" inputmode="numeric" />
+        </label>
+        <label>
+          Cost per cigarette
+          <input id="f-cost" type="number" min="0" step="0.01" inputmode="decimal" />
+        </label>
+        <label>
+          Currency symbol
+          <input id="f-currency" type="text" maxlength="3" />
+        </label>
+        <label>
+          Baseline cigs/day (your "before")
+          <input id="f-baseline" type="number" min="0" step="1" inputmode="numeric" />
+        </label>
+        <div class="settings-actions">
+          <button type="button" id="reset-btn" class="danger">Reset all data</button>
+          <div class="spacer"></div>
+          <button type="button" id="settings-close">Cancel</button>
+          <button type="submit" class="primary">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
