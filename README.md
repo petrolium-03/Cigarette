@@ -1,17 +1,24 @@
 # Cigarette Tracker
 
-A zero-dependency, offline-first PWA to track cigarettes you smoke with one tap.
-Set a daily goal, watch savings vs. your baseline accrue, earn silly character
-badges along the way.
+A zero-dependency, offline-first PWA designed to help you cut back on smoking.
+Each cigarette is logged by tapping a "stub it out" button — you watch the
+graphic ember die and a smoke puff fade. Set a daily limit you're trying to
+stay under, see what you've saved by smoking less, and unlock milestone badges
+that reward awareness and restraint.
 
 ## Features
 
-- One big button to log a cigarette
+- Stub-out button: tap when you smoke one and watch the cigarette get
+  extinguished
+- Daily **limit** (not a goal) with progress bar that turns red when you
+  exceed it, and copy that always frames things as "X under your limit"
 - Undo the last entry
-- Day / week / month stats with a chart
-- Daily goal with progress bar
-- Cost saved + cigarettes avoided vs. a configurable baseline
-- Funny character milestone badges (Smoldering Sloth, Mythical Zero, …)
+- Day / week / month stats with a chart, including a streak counter for days
+  you stayed under your limit
+- Money saved by cutting back + cigarettes your lungs skipped, vs. your old
+  baseline
+- Tappable milestone badges (Honest Mirror, Steady Tortoise, Mythical Zero, …)
+  that reward tracking, restraint, and quitting — never the act of smoking
 - Installable PWA, works fully offline, all data stored locally in your browser
 
 ## Run locally

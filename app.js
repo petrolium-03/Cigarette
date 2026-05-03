@@ -12,9 +12,9 @@ import {
   bucketsByDay,
   costSaved,
   cigsAvoided,
-  streakUnderGoal,
+  streakUnderLimit,
 } from "./stats.js";
-import { BADGES, evaluate, getById } from "./badges.js";
+import { BADGES, evaluate } from "./badges.js";
 import { drawBarChart } from "./chart.js";
 
 const state = load();
@@ -24,9 +24,11 @@ const $ = (sel) => document.querySelector(sel);
 
 const els = {
   todayCount: $("#today-count"),
-  todayGoal: $("#today-goal"),
-  goalBar: $("#goal-bar"),
+  todayLimit: $("#today-limit"),
+  todaySub: $("#today-sub"),
+  limitBar: $("#limit-bar"),
   logBtn: $("#log-btn"),
+  cigGroup: $(".cig"),
   undoBtn: $("#undo-btn"),
   undoLabel: $("#undo-label"),
   rangeTabs: document.querySelectorAll(".range-tab"),
@@ -39,11 +41,17 @@ const els = {
   streak: $("#streak"),
   badges: $("#badges"),
   toast: $("#toast"),
+  badgeDialog: $("#badge-dialog"),
+  badgeClose: $("#badge-close"),
+  badgeDEmoji: $("#badge-d-emoji"),
+  badgeDName: $("#badge-d-name"),
+  badgeDBlurb: $("#badge-d-blurb"),
+  badgeDStatus: $("#badge-d-status"),
   settingsBtn: $("#settings-btn"),
   settingsDialog: $("#settings-dialog"),
   settingsClose: $("#settings-close"),
   settingsForm: $("#settings-form"),
-  fGoal: $("#f-goal"),
+  fLimit: $("#f-limit"),
   fCost: $("#f-cost"),
   fCurrency: $("#f-currency"),
   fBaseline: $("#f-baseline"),
@@ -67,12 +75,22 @@ function relTime(ts) {
 
 function render() {
   const today = countForDay(state.log);
-  const goal = state.settings.dailyGoal;
+  const limit = state.settings.dailyLimit;
   els.todayCount.textContent = today;
-  els.todayGoal.textContent = goal;
-  const pct = Math.min(100, (today / Math.max(1, goal)) * 100);
-  els.goalBar.style.width = `${pct}%`;
-  els.goalBar.classList.toggle("over", today > goal);
+  els.todayLimit.textContent = limit;
+
+  const remaining = Math.max(0, limit - today);
+  if (today === 0) {
+    els.todaySub.textContent = `Daily limit ${limit} — clean so far today`;
+  } else if (today <= limit) {
+    els.todaySub.textContent = `${remaining} under your daily limit of ${limit}`;
+  } else {
+    els.todaySub.textContent = `${today - limit} over your daily limit of ${limit}`;
+  }
+
+  const pct = Math.min(100, (today / Math.max(1, limit)) * 100);
+  els.limitBar.style.width = `${pct}%`;
+  els.limitBar.classList.toggle("over", today > limit);
 
   const last = state.log[state.log.length - 1];
   els.undoBtn.disabled = !last;
@@ -88,11 +106,11 @@ function render() {
 
   const buckets = bucketsByDay(state.log, days);
   const labels = days <= 7 ? labelDays(days) : null;
-  drawBarChart(els.chart, buckets, { goal, labels });
+  drawBarChart(els.chart, buckets, { goal: limit, labels });
 
   els.costSaved.textContent = fmtCurrency(costSaved(state));
   els.cigsAvoided.textContent = cigsAvoided(state);
-  els.streak.textContent = streakUnderGoal(state.log, goal);
+  els.streak.textContent = streakUnderLimit(state.log, limit);
 
   renderBadges();
 }
@@ -115,11 +133,21 @@ function renderBadges() {
     const el = document.createElement("button");
     el.type = "button";
     el.className = `badge ${earned ? "earned" : "locked"}`;
-    el.title = `${b.name} — ${b.blurb}`;
-    el.setAttribute("aria-label", `${b.name}: ${b.blurb}`);
+    el.setAttribute("aria-label", `${b.name} — ${earned ? "unlocked" : "locked"}`);
     el.innerHTML = `<span class="badge-emoji">${b.emoji}</span><span class="badge-name">${b.name}</span>`;
+    el.addEventListener("click", () => showBadge(b, earned));
     els.badges.appendChild(el);
   }
+}
+
+function showBadge(badge, earned) {
+  els.badgeDEmoji.textContent = badge.emoji;
+  els.badgeDName.textContent = badge.name;
+  els.badgeDBlurb.textContent = badge.blurb;
+  els.badgeDStatus.textContent = earned ? "Unlocked" : "Locked";
+  els.badgeDialog.classList.toggle("unlocked", earned);
+  els.badgeDialog.classList.toggle("locked", !earned);
+  els.badgeDialog.showModal();
 }
 
 function toast(msg, emoji = "🎉") {
@@ -138,12 +166,24 @@ function checkBadges() {
   });
 }
 
+function triggerStubAnimation() {
+  els.logBtn.classList.remove("stubbing");
+  // Force a reflow so the animation restarts cleanly on rapid taps.
+  // Reading offsetWidth is the reliable cross-browser way.
+  void els.logBtn.offsetWidth;
+  els.logBtn.classList.add("stubbing");
+}
+
+els.logBtn.addEventListener("animationend", (e) => {
+  if (e.animationName === "stub-out") {
+    els.logBtn.classList.remove("stubbing");
+  }
+});
+
 els.logBtn.addEventListener("click", () => {
   addEntry(state);
   if (navigator.vibrate) navigator.vibrate(20);
-  els.logBtn.classList.remove("pulse");
-  void els.logBtn.offsetWidth;
-  els.logBtn.classList.add("pulse");
+  triggerStubAnimation();
   render();
   checkBadges();
 });
@@ -162,8 +202,20 @@ els.rangeTabs.forEach((tab) => {
   });
 });
 
+els.badgeClose.addEventListener("click", () => els.badgeDialog.close());
+els.badgeDialog.addEventListener("click", (e) => {
+  // Click on backdrop closes
+  const r = els.badgeDialog.getBoundingClientRect();
+  if (
+    e.clientX < r.left || e.clientX > r.right ||
+    e.clientY < r.top  || e.clientY > r.bottom
+  ) {
+    els.badgeDialog.close();
+  }
+});
+
 els.settingsBtn.addEventListener("click", () => {
-  els.fGoal.value = state.settings.dailyGoal;
+  els.fLimit.value = state.settings.dailyLimit;
   els.fCost.value = state.settings.costPerCig;
   els.fCurrency.value = state.settings.currency;
   els.fBaseline.value = state.settings.baselinePerDay;
@@ -175,7 +227,7 @@ els.settingsClose.addEventListener("click", () => els.settingsDialog.close());
 els.settingsForm.addEventListener("submit", (e) => {
   e.preventDefault();
   updateSettings(state, {
-    dailyGoal: Math.max(0, parseInt(els.fGoal.value, 10) || 0),
+    dailyLimit: Math.max(0, parseInt(els.fLimit.value, 10) || 0),
     costPerCig: Math.max(0, parseFloat(els.fCost.value) || 0),
     currency: els.fCurrency.value.trim().slice(0, 3) || "$",
     baselinePerDay: Math.max(0, parseInt(els.fBaseline.value, 10) || 0),

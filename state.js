@@ -3,7 +3,7 @@ const STORAGE_KEY = "cigtracker.v1";
 const DEFAULT_STATE = {
   log: [],
   settings: {
-    dailyGoal: 10,
+    dailyLimit: 10,
     costPerCig: 0.5,
     currency: "$",
     baselinePerDay: 20,
@@ -15,6 +15,26 @@ const DEFAULT_STATE = {
   createdAt: 0,
 };
 
+function migrate(parsed) {
+  const settings = { ...DEFAULT_STATE.settings, ...(parsed.settings || {}) };
+  if (parsed.settings && "dailyGoal" in parsed.settings && !("dailyLimit" in parsed.settings)) {
+    settings.dailyLimit = parsed.settings.dailyGoal;
+  }
+  const earned = (parsed.badges?.earned || []).map((id) => {
+    if (id === "first_puff") return "first_log";
+    if (id === "under_goal_3") return "under_limit_3";
+    if (id === "under_goal_7") return "under_limit_7";
+    return id;
+  });
+  return {
+    ...structuredClone(DEFAULT_STATE),
+    ...parsed,
+    settings,
+    badges: { ...DEFAULT_STATE.badges, ...(parsed.badges || {}), earned },
+    log: Array.isArray(parsed.log) ? parsed.log.slice().sort((a, b) => a - b) : [],
+  };
+}
+
 export function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -23,14 +43,7 @@ export function load() {
       save(seeded);
       return seeded;
     }
-    const parsed = JSON.parse(raw);
-    return {
-      ...structuredClone(DEFAULT_STATE),
-      ...parsed,
-      settings: { ...DEFAULT_STATE.settings, ...(parsed.settings || {}) },
-      badges: { ...DEFAULT_STATE.badges, ...(parsed.badges || {}) },
-      log: Array.isArray(parsed.log) ? parsed.log.slice().sort((a, b) => a - b) : [],
-    };
+    return migrate(JSON.parse(raw));
   } catch {
     return { ...structuredClone(DEFAULT_STATE), createdAt: Date.now() };
   }

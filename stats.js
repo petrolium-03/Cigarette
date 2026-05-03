@@ -47,13 +47,13 @@ export function daysTracked(state, now = Date.now()) {
   return Math.max(1, diff);
 }
 
-export function streakUnderGoal(log, dailyGoal, now = Date.now()) {
+export function streakUnderLimit(log, dailyLimit, now = Date.now()) {
   if (!log.length) return 0;
   const earliest = startOfDay(log[0]);
   let streak = 0;
   let cursor = startOfDay(now);
   while (cursor >= earliest) {
-    if (countForDay(log, cursor) <= dailyGoal) {
+    if (countForDay(log, cursor) <= dailyLimit) {
       streak++;
       cursor -= DAY_MS;
     } else break;

@@ -4,10 +4,17 @@
   --surface-2: #f0ece8;
   --text: #1a1a1a;
   --muted: #7a7368;
-  --accent: #e26d5c;
-  --accent-2: #ffb085;
+  --accent: #3aa76d;
+  --accent-2: #5dd398;
   --danger: #c0392b;
-  --goal: #3aa76d;
+  --warn: #e26d5c;
+  --good: #3aa76d;
+  --ashtray: #2a2622;
+  --ashtray-2: #3a342f;
+  --ember: #ff5a3c;
+  --paper: #f5f0e8;
+  --filter: #e2a855;
+  --ash: #c9c4be;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
   --radius: 16px;
 }
@@ -19,10 +26,13 @@
     --surface-2: #2a2622;
     --text: #f3efe9;
     --muted: #9a9389;
-    --accent: #ff8a73;
-    --accent-2: #ffb085;
+    --accent: #5dd398;
+    --accent-2: #7ee8b1;
     --danger: #ff6b5c;
-    --goal: #5dd398;
+    --warn: #ff8a73;
+    --good: #5dd398;
+    --ashtray: #0c0a09;
+    --ashtray-2: #1a1614;
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.25);
   }
 }
@@ -89,9 +99,10 @@ main {
 
 .today-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
+  gap: 16px;
 }
 .today-label {
   font-size: 14px;
@@ -99,69 +110,189 @@ main {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+.today-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
 .today-count {
   font-size: 28px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-.today-sep, #today-goal { color: var(--muted); font-weight: 500; font-size: 22px; }
+.today-sep, #today-limit { color: var(--muted); font-weight: 500; font-size: 22px; }
 
-.goal-track {
+.limit-track {
   position: relative;
   height: 10px;
   background: var(--surface-2);
   border-radius: 999px;
   overflow: hidden;
 }
-.goal-bar {
+.limit-bar {
   position: absolute;
   inset: 0;
   width: 0%;
-  background: linear-gradient(90deg, var(--goal), var(--accent-2));
+  background: linear-gradient(90deg, var(--good), var(--accent-2));
   transition: width 0.25s ease, background 0.25s ease;
 }
-.goal-bar.over {
-  background: linear-gradient(90deg, var(--accent), var(--danger));
+.limit-bar.over {
+  background: linear-gradient(90deg, var(--warn), var(--danger));
 }
+
+/* ─── Action card / stub-out button ─── */
 
 .action-card {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 10px;
-  padding: 18px;
+  padding: 14px;
 }
 
 .log-btn {
+  position: relative;
   width: 100%;
-  min-height: 140px;
+  min-height: 180px;
   border: none;
   border-radius: 24px;
-  background: linear-gradient(160deg, var(--accent), #b54a3d);
-  color: white;
-  font-size: 22px;
+  background:
+    radial-gradient(ellipse at 50% 110%, rgba(255,255,255,0.06) 0%, transparent 50%),
+    linear-gradient(160deg, var(--ashtray-2), var(--ashtray));
+  color: #f3efe9;
+  font-size: 18px;
   font-weight: 600;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 4px;
+  padding: 16px;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(226, 109, 92, 0.35);
-  transition: transform 0.08s ease, box-shadow 0.2s ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 8px 24px rgba(0,0,0,0.18);
   -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
 }
-.log-btn:active { transform: scale(0.98); }
-.log-plus { font-size: 56px; line-height: 1; font-weight: 300; }
-.log-text { font-size: 16px; opacity: 0.95; letter-spacing: 0.4px; text-transform: uppercase; }
 
-.log-btn.pulse {
-  animation: pulse 0.45s ease;
+.log-btn::after {
+  /* subtle ashtray rim */
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.04);
+  pointer-events: none;
 }
-@keyframes pulse {
-  0% { transform: scale(1); box-shadow: 0 8px 24px rgba(226, 109, 92, 0.35); }
-  50% { transform: scale(1.02); box-shadow: 0 12px 30px rgba(226, 109, 92, 0.5); }
-  100% { transform: scale(1); box-shadow: 0 8px 24px rgba(226, 109, 92, 0.35); }
+
+.cig-svg {
+  width: 220px;
+  max-width: 90%;
+  height: auto;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.cig-body { fill: var(--paper); }
+.cig-filter { fill: var(--filter); }
+.cig-line { stroke: rgba(120,80,30,0.6); stroke-width: 1; }
+.cig-ash { fill: var(--ash); opacity: 0.85; }
+.cig-ember {
+  fill: var(--ember);
+  filter: drop-shadow(0 0 6px rgba(255, 90, 60, 0.7));
+  transform-origin: 162px 63px;
+  animation: ember-glow 2s ease-in-out infinite;
+}
+
+.ashtray-line {
+  stroke: rgba(255,255,255,0.05);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+@keyframes ember-glow {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 4px rgba(255,90,60,0.55)); }
+  50%      { opacity: 0.85; filter: drop-shadow(0 0 9px rgba(255,90,60,0.9)); }
+}
+
+.cig {
+  transform-origin: 30px 63px;
+  transition: transform 0.05s linear;
+}
+
+.smoke .puff {
+  fill: rgba(220, 220, 220, 0.55);
+  transform-origin: center;
+  opacity: 0;
+  animation: drift 3s ease-out infinite;
+}
+.smoke .p1 { animation-delay: 0s; }
+.smoke .p2 { animation-delay: 0.8s; }
+.smoke .p3 { animation-delay: 1.6s; }
+
+@keyframes drift {
+  0%   { transform: translate(0, 0) scale(0.5); opacity: 0; }
+  20%  { opacity: 0.55; }
+  100% { transform: translate(14px, -42px) scale(1.6); opacity: 0; }
+}
+
+/* Stub-out animation: cigarette tilts + drops, ember dies, big smoke puff */
+
+.log-btn.stubbing .cig {
+  animation: stub-out 0.7s cubic-bezier(0.34, 1.4, 0.5, 1) forwards;
+}
+.log-btn.stubbing .cig-ember {
+  animation: ember-die 0.55s ease-out forwards;
+}
+.log-btn.stubbing .cig-ash {
+  animation: ash-spread 0.7s ease-out forwards;
+}
+.log-btn.stubbing .smoke .puff {
+  animation: big-puff 0.7s ease-out forwards;
+}
+
+@keyframes stub-out {
+  0%   { transform: rotate(0)     translateY(0); }
+  35%  { transform: rotate(14deg) translateY(7px); }
+  60%  { transform: rotate(20deg) translateY(11px); }
+  100% { transform: rotate(20deg) translateY(11px); }
+}
+
+@keyframes ember-die {
+  0%   { fill: var(--ember); filter: drop-shadow(0 0 8px rgba(255,90,60,0.9)); transform: scale(1); }
+  40%  { fill: #b94324; filter: drop-shadow(0 0 4px rgba(255,90,60,0.4)); transform: scale(0.9); }
+  100% { fill: #2a2622; filter: none; transform: scale(0.6); }
+}
+
+@keyframes ash-spread {
+  0%   { transform: translate(0, 0) scaleX(1); opacity: 0.85; }
+  100% { transform: translate(4px, 4px) scaleX(1.25); opacity: 0.5; }
+}
+
+@keyframes big-puff {
+  0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  20%  { transform: translate(-2px, -8px) scale(1.4); opacity: 0.7; }
+  100% { transform: translate(-12px, -50px) scale(2.2); opacity: 0; }
+}
+
+/* When animating, suppress the looping smoke/ember by overriding
+   their default animations with the stub-out ones above.
+   This works because the .stubbing rules redefine `animation` on the
+   same elements. */
+
+.log-text {
+  font-size: 17px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+.log-sub {
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  color: rgba(243,239,233,0.55);
+  text-transform: none;
+  font-weight: 500;
 }
 
 .undo-btn {
@@ -178,6 +309,8 @@ main {
   gap: 6px;
 }
 .undo-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* ─── Stats ─── */
 
 .range-tabs {
   display: inline-flex;
@@ -216,6 +349,7 @@ main {
   font-size: 14px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+  flex-wrap: wrap;
 }
 .range-numbers strong {
   color: var(--text);
@@ -230,6 +364,8 @@ main {
   height: 120px;
 }
 
+/* ─── Impact ─── */
+
 .impact-card {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -241,13 +377,14 @@ main {
   gap: 12px;
 }
 .impact-emoji {
-  font-size: 28px;
+  font-size: 26px;
   width: 44px;
   height: 44px;
   display: grid;
   place-items: center;
   background: var(--surface-2);
   border-radius: 12px;
+  flex-shrink: 0;
 }
 .impact-value {
   font-size: 20px;
@@ -257,15 +394,23 @@ main {
 .impact-label {
   font-size: 12px;
   color: var(--muted);
+  line-height: 1.3;
 }
+
+/* ─── Badges ─── */
 
 .badges-card h2 {
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--muted);
-  margin: 0 0 12px;
+  margin: 0 0 4px;
   font-weight: 600;
+}
+.badges-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 12px;
 }
 .badges {
   display: grid;
@@ -281,13 +426,19 @@ main {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  cursor: help;
+  cursor: pointer;
   transition: transform 0.15s ease;
+  color: inherit;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 .badge:hover { transform: translateY(-2px); }
-.badge.locked { opacity: 0.35; filter: grayscale(0.8); }
-.badge-emoji { font-size: 28px; }
+.badge:active { transform: translateY(0); }
+.badge.locked { opacity: 0.4; filter: grayscale(0.8); }
+.badge-emoji { font-size: 28px; line-height: 1; }
 .badge-name { font-size: 11px; color: var(--text); text-align: center; line-height: 1.2; }
+
+/* ─── Toast ─── */
 
 .toast {
   position: fixed;
@@ -315,17 +466,21 @@ main {
 }
 .toast-emoji { font-size: 22px; }
 
-.settings-dialog {
+/* ─── Dialogs ─── */
+
+.settings-dialog,
+.badge-dialog {
   border: none;
   border-radius: 20px;
   background: var(--surface);
   color: var(--text);
   padding: 0;
   max-width: 92vw;
-  width: 380px;
+  width: 360px;
   box-shadow: 0 30px 60px rgba(0,0,0,0.3);
 }
-.settings-dialog::backdrop {
+.settings-dialog::backdrop,
+.badge-dialog::backdrop {
   background: rgba(0,0,0,0.4);
   backdrop-filter: blur(4px);
 }
@@ -386,4 +541,61 @@ main {
   color: var(--danger);
   font-size: 13px;
   padding-left: 0;
+}
+
+/* Badge detail dialog */
+.badge-dialog {
+  padding: 28px 24px 20px;
+  text-align: center;
+  position: relative;
+}
+.dialog-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 24px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+.dialog-close:hover { background: var(--surface-2); color: var(--text); }
+.badge-d-emoji {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 8px;
+  filter: none;
+}
+.badge-dialog.locked .badge-d-emoji {
+  filter: grayscale(0.8);
+  opacity: 0.5;
+}
+.badge-d-name {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.badge-d-blurb {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+.badge-d-status {
+  display: inline-block;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.badge-dialog.unlocked .badge-d-status {
+  background: var(--accent);
+  color: white;
 }
