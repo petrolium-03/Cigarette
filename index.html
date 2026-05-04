@@ -70,6 +70,19 @@
           <span aria-hidden="true">↶</span>
           <span id="undo-label">Nothing to undo</span>
         </button>
+        <button id="pack-btn" class="pack-btn" type="button">
+          <span aria-hidden="true">🛒</span>
+          <span id="pack-btn-label">I bought a pack</span>
+        </button>
+      </section>
+
+      <section class="pack-summary" id="pack-summary" hidden aria-live="polite">
+        <span class="pack-icon" aria-hidden="true">📦</span>
+        <div class="pack-summary-text">
+          Spent <strong id="pack-spent">$0.00</strong>
+          on <span id="pack-count">0</span>&nbsp;<span id="pack-unit">packs</span>
+          · <strong id="pack-rate">$0.00</strong>/<span id="pack-rate-noun">cig</span>
+        </div>
       </section>
 
       <section class="stats-card">
@@ -163,6 +176,26 @@
     </aside>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <dialog id="pack-dialog" class="settings-dialog">
+      <form id="pack-form" method="dialog">
+        <h2 id="pack-h">New pack</h2>
+        <p class="pack-help">Optional — these numbers refine the per-cigarette cost used in your stats.</p>
+        <label>
+          <span id="pack-count-lbl">Cigarettes in the pack</span>
+          <input id="pack-f-count" type="number" min="1" step="1" inputmode="numeric" required />
+        </label>
+        <label>
+          <span id="pack-cost-lbl">Total pack cost</span>
+          <input id="pack-f-cost" type="number" min="0" step="0.01" inputmode="decimal" required />
+        </label>
+        <div class="settings-actions">
+          <div class="spacer"></div>
+          <button type="button" id="pack-cancel">Cancel</button>
+          <button type="submit" class="primary">Save</button>
+        </div>
+      </form>
+    </dialog>
 
     <dialog id="badge-dialog" class="badge-dialog">
       <button type="button" id="badge-close" class="dialog-close" aria-label="Close">×</button>

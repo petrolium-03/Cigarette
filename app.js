@@ -8,6 +8,7 @@ import {
   loadActiveMode,
   saveActiveMode,
   resetMode,
+  addPack,
 } from "./state.js";
 import {
   countForDay,
@@ -16,6 +17,9 @@ import {
   costSaved,
   cigsAvoided,
   streakUnderLimit,
+  effectiveCostPerCig,
+  totalSpentOnPacks,
+  packCount,
 } from "./stats.js";
 import { BADGES, evaluate, blurbText } from "./badges.js";
 import { drawBarChart } from "./chart.js";
@@ -80,6 +84,22 @@ const els = {
   sbStreak: $("#sb-streak"),
   sbItems: document.querySelectorAll(".sb-item"),
   modeOpts: document.querySelectorAll(".mode-opt"),
+  packBtn: $("#pack-btn"),
+  packBtnLabel: $("#pack-btn-label"),
+  packDialog: $("#pack-dialog"),
+  packForm: $("#pack-form"),
+  packCancel: $("#pack-cancel"),
+  packH: $("#pack-h"),
+  packCountLbl: $("#pack-count-lbl"),
+  packCostLbl: $("#pack-cost-lbl"),
+  packFCount: $("#pack-f-count"),
+  packFCost: $("#pack-f-cost"),
+  packSummary: $("#pack-summary"),
+  packSpent: $("#pack-spent"),
+  packCountOut: $("#pack-count"),
+  packUnit: $("#pack-unit"),
+  packRate: $("#pack-rate"),
+  packRateNoun: $("#pack-rate-noun"),
 };
 
 function fmtCurrency(n) {
@@ -110,6 +130,11 @@ function applyMode() {
   els.lblLimit.textContent = `Daily limit (${mode.pluralNoun})`;
   els.lblCost.textContent = `Cost per ${mode.singularNoun}`;
   els.lblBaseline.textContent = `Baseline ${mode.shortPlural}/day (your "before")`;
+  els.packBtnLabel.textContent = mode.purchaseLabel;
+  els.packH.textContent = mode.purchaseTitle;
+  els.packCountLbl.textContent = mode.purchaseCountLabel;
+  els.packCostLbl.textContent = mode.purchaseCostLabel;
+  els.packRateNoun.textContent = mode.shortNoun;
   els.modeOpts.forEach((opt) => {
     const isActive = opt.dataset.mode === activeModeId;
     opt.setAttribute("aria-checked", String(isActive));
@@ -160,7 +185,21 @@ function render() {
   els.streak.textContent = streakUnderLimit(state.log, limit);
 
   renderSidebarStats(today, limit);
+  renderPackSummary();
   renderBadges();
+}
+
+function renderPackSummary() {
+  const n = packCount(state);
+  if (n === 0) {
+    els.packSummary.hidden = true;
+    return;
+  }
+  els.packSummary.hidden = false;
+  els.packSpent.textContent = fmtCurrency(totalSpentOnPacks(state));
+  els.packCountOut.textContent = n;
+  els.packUnit.textContent = n === 1 ? mode.purchaseUnit : mode.purchaseUnitPlural;
+  els.packRate.textContent = fmtCurrency(effectiveCostPerCig(state));
 }
 
 function renderSidebarStats(today, limit) {
@@ -348,6 +387,42 @@ els.modeOpts.forEach((opt) => {
   opt.addEventListener("click", () => {
     switchMode(opt.dataset.mode);
   });
+});
+
+els.packBtn.addEventListener("click", () => {
+  const last = state.packs?.[state.packs.length - 1];
+  els.packFCount.value = last?.count ?? mode.defaultPurchaseCount;
+  els.packFCost.value = last?.cost?.toFixed(2) ?? "";
+  els.packDialog.showModal();
+  // Focus the cost field since count usually stays the same.
+  setTimeout(() => els.packFCost.focus(), 0);
+});
+
+els.packCancel.addEventListener("click", () => els.packDialog.close());
+
+els.packForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const count = parseInt(els.packFCount.value, 10);
+  const cost = parseFloat(els.packFCost.value);
+  if (!(count > 0) || !(cost >= 0) || Number.isNaN(cost)) return;
+  addPack(state, { count, cost });
+  els.packDialog.close();
+  toast(
+    `${mode.purchaseTitle} saved · ${fmtCurrency(cost / count)}/${mode.shortNoun}`,
+    "📦"
+  );
+  render();
+  checkBadges();
+});
+
+els.packDialog.addEventListener("click", (e) => {
+  const r = els.packDialog.getBoundingClientRect();
+  if (
+    e.clientX < r.left || e.clientX > r.right ||
+    e.clientY < r.top  || e.clientY > r.bottom
+  ) {
+    els.packDialog.close();
+  }
 });
 
 setInterval(() => {

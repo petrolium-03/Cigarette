@@ -12,6 +12,7 @@ function defaultStateFor(modeId) {
   const meta = getMode(modeId);
   return {
     log: [],
+    packs: [],
     settings: { ...meta.defaults },
     badges: { earned: [], lastSeenAt: 0 },
     createdAt: 0,
@@ -49,6 +50,7 @@ function migrateState(parsed, modeId) {
     settings,
     badges: { ...defaultStateFor(modeId).badges, ...(parsed.badges || {}), earned },
     log: Array.isArray(parsed.log) ? parsed.log.slice().sort((a, b) => a - b) : [],
+    packs: Array.isArray(parsed.packs) ? parsed.packs.slice().sort((a, b) => a.ts - b.ts) : [],
     _mode: modeId,
   };
 }
@@ -108,6 +110,13 @@ export function markBadgesSeen(state, ids) {
   for (const id of ids) set.add(id);
   state.badges.earned = [...set];
   state.badges.lastSeenAt = Date.now();
+  save(state);
+}
+
+export function addPack(state, { count, cost, ts = Date.now() }) {
+  if (!Array.isArray(state.packs)) state.packs = [];
+  state.packs.push({ ts, count, cost });
+  state.packs.sort((a, b) => a.ts - b.ts);
   save(state);
 }
 

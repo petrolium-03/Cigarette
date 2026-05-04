@@ -67,8 +67,27 @@ export function cigsAvoided(state, now = Date.now()) {
   return Math.max(0, baseline - state.log.length);
 }
 
+export function effectiveCostPerCig(state) {
+  // Latest pack is the most recent real-world price; falls back to the
+  // user's settings estimate when no pack history exists.
+  if (Array.isArray(state.packs) && state.packs.length) {
+    const last = state.packs[state.packs.length - 1];
+    if (last && last.count > 0) return last.cost / last.count;
+  }
+  return state.settings.costPerCig;
+}
+
 export function costSaved(state, now = Date.now()) {
-  return cigsAvoided(state, now) * state.settings.costPerCig;
+  return cigsAvoided(state, now) * effectiveCostPerCig(state);
+}
+
+export function totalSpentOnPacks(state) {
+  if (!Array.isArray(state.packs)) return 0;
+  return state.packs.reduce((sum, p) => sum + (p.cost || 0), 0);
+}
+
+export function packCount(state) {
+  return Array.isArray(state.packs) ? state.packs.length : 0;
 }
 
 export function hasZeroDayAfter3Tracked(state, now = Date.now()) {

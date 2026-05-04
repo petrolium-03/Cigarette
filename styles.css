@@ -328,6 +328,62 @@ main {
 }
 .undo-btn:disabled { opacity: 0.5; cursor: default; }
 
+.pack-btn {
+  align-self: center;
+  background: transparent;
+  color: var(--muted);
+  border: 1px dashed var(--surface-2);
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.pack-btn:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.pack-summary {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pack-summary[hidden] { display: none; }
+.pack-icon {
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.pack-summary-text {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.pack-summary-text strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.pack-help {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
 /* ─── Stats ─── */
 
 .range-tabs {
