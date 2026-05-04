@@ -56,6 +56,15 @@ const els = {
   fCurrency: $("#f-currency"),
   fBaseline: $("#f-baseline"),
   resetBtn: $("#reset-btn"),
+  menuBtn: $("#menu-btn"),
+  sidebar: $("#sidebar"),
+  sidebarBackdrop: $("#sidebar-backdrop"),
+  sidebarClose: $("#sidebar-close"),
+  sbToday: $("#sb-today"),
+  sbAvoided: $("#sb-avoided"),
+  sbSaved: $("#sb-saved"),
+  sbStreak: $("#sb-streak"),
+  sbItems: document.querySelectorAll(".sb-item"),
 };
 
 function fmtCurrency(n) {
@@ -112,7 +121,15 @@ function render() {
   els.cigsAvoided.textContent = cigsAvoided(state);
   els.streak.textContent = streakUnderLimit(state.log, limit);
 
+  renderSidebarStats(today, limit);
   renderBadges();
+}
+
+function renderSidebarStats(today, limit) {
+  els.sbToday.textContent = today;
+  els.sbAvoided.textContent = cigsAvoided(state);
+  els.sbSaved.textContent = fmtCurrency(costSaved(state));
+  els.sbStreak.textContent = `${streakUnderLimit(state.log, limit)} d`;
 }
 
 function labelDays(n) {
@@ -241,6 +258,42 @@ els.resetBtn.addEventListener("click", () => {
   if (!confirm("Erase all logs and settings? This cannot be undone.")) return;
   localStorage.removeItem("cigtracker.v1");
   location.reload();
+});
+
+function openSidebar() {
+  els.sidebar.classList.add("open");
+  els.sidebarBackdrop.classList.add("open");
+  els.sidebar.setAttribute("aria-hidden", "false");
+  els.menuBtn.setAttribute("aria-expanded", "true");
+  document.body.style.overflow = "hidden";
+}
+
+function closeSidebar() {
+  els.sidebar.classList.remove("open");
+  els.sidebarBackdrop.classList.remove("open");
+  els.sidebar.setAttribute("aria-hidden", "true");
+  els.menuBtn.setAttribute("aria-expanded", "false");
+  document.body.style.overflow = "";
+}
+
+els.menuBtn.addEventListener("click", openSidebar);
+els.sidebarClose.addEventListener("click", closeSidebar);
+els.sidebarBackdrop.addEventListener("click", closeSidebar);
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && els.sidebar.classList.contains("open")) closeSidebar();
+});
+
+const PLACEHOLDER_LABELS = {
+  leaderboard: "Leaderboard",
+  achievements: "Achievements",
+  settings: "Settings",
+};
+els.sbItems.forEach((b) => {
+  b.addEventListener("click", () => {
+    const label = PLACEHOLDER_LABELS[b.dataset.action] || "This";
+    closeSidebar();
+    toast(`${label} — coming soon`, "🚧");
+  });
 });
 
 setInterval(() => {

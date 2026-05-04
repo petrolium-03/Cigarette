@@ -12,6 +12,7 @@
   </head>
   <body>
     <header class="topbar">
+      <button id="menu-btn" class="icon-btn" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false">☰</button>
       <h1>Cigarette Tracker</h1>
       <button id="settings-btn" class="icon-btn" aria-label="Settings">⚙️</button>
     </header>
@@ -107,6 +108,39 @@
         <div id="badges" class="badges"></div>
       </section>
     </main>
+
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+    <aside id="sidebar" class="sidebar" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true">
+      <div class="sidebar-header">
+        <button type="button" id="sidebar-close" class="icon-btn" aria-label="Close menu">✕</button>
+      </div>
+      <div class="sidebar-stats">
+        <h3 class="sidebar-h">Your stats</h3>
+        <dl class="sidebar-dl">
+          <div class="stat-row"><dt>Today</dt><dd id="sb-today">0</dd></div>
+          <div class="stat-row"><dt>Cigs your lungs skipped</dt><dd id="sb-avoided">0</dd></div>
+          <div class="stat-row"><dt>Saved by cutting back</dt><dd id="sb-saved">$0.00</dd></div>
+          <div class="stat-row"><dt>Streak under limit</dt><dd id="sb-streak">0 d</dd></div>
+        </dl>
+      </div>
+      <nav class="sidebar-nav" aria-label="Main">
+        <button type="button" class="sb-item" data-action="leaderboard">
+          <span class="sb-icon" aria-hidden="true">🏁</span>
+          <span class="sb-label">Leaderboard</span>
+          <span class="sb-chev" aria-hidden="true">›</span>
+        </button>
+        <button type="button" class="sb-item" data-action="achievements">
+          <span class="sb-icon" aria-hidden="true">🏆</span>
+          <span class="sb-label">Achievements</span>
+          <span class="sb-chev" aria-hidden="true">›</span>
+        </button>
+        <button type="button" class="sb-item" data-action="settings">
+          <span class="sb-icon" aria-hidden="true">⚙️</span>
+          <span class="sb-label">Settings</span>
+          <span class="sb-chev" aria-hidden="true">›</span>
+        </button>
+      </nav>
+    </aside>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
