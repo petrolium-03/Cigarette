@@ -36,7 +36,7 @@
       </section>
 
       <section class="action-card">
-        <button id="log-btn" class="log-btn" aria-label="Log a cigarette and stub it out">
+        <button id="log-btn" class="log-btn" aria-label="Stub it out">
           <svg
             class="cig-svg"
             viewBox="0 0 220 110"
@@ -49,16 +49,22 @@
               <circle class="puff p3" cx="186" cy="34" r="3.5" />
             </g>
             <g class="cig">
-              <rect class="cig-body" x="30" y="56" width="130" height="14" rx="3" />
-              <rect class="cig-filter" x="30" y="56" width="36" height="14" rx="3" />
-              <line class="cig-line" x1="66" y1="57" x2="66" y2="69" />
+              <g class="cig-cigarette">
+                <rect class="cig-body" x="30" y="56" width="130" height="14" rx="3" />
+                <rect class="cig-filter" x="30" y="56" width="36" height="14" rx="3" />
+                <line class="cig-line" x1="66" y1="57" x2="66" y2="69" />
+              </g>
+              <g class="cig-joint">
+                <path class="joint-body" d="M30,63 L48,55 L155,55 L155,71 L48,71 Z" />
+                <path class="joint-twist" d="M30,63 L36,60 M30,63 L36,66" />
+              </g>
               <rect class="cig-ash" x="138" y="57" width="22" height="12" rx="2" />
               <circle class="cig-ember" cx="162" cy="63" r="6" />
             </g>
             <line class="ashtray-line" x1="20" y1="92" x2="200" y2="92" />
           </svg>
           <span class="log-text">Stub it out</span>
-          <span class="log-sub">tap when you smoke one</span>
+          <span class="log-sub" id="action-sub">tap when you smoke one</span>
         </button>
         <button id="undo-btn" class="undo-btn" disabled>
           <span aria-hidden="true">↶</span>
@@ -97,7 +103,7 @@
           <span class="impact-emoji">🫁</span>
           <div>
             <div class="impact-value"><span id="cigs-avoided">0</span></div>
-            <div class="impact-label">cigs your lungs skipped</div>
+            <div class="impact-label" id="impact-avoided-label">cigs your lungs skipped</div>
           </div>
         </div>
       </section>
@@ -114,11 +120,25 @@
       <div class="sidebar-header">
         <button type="button" id="sidebar-close" class="icon-btn" aria-label="Close menu">✕</button>
       </div>
+      <div class="sidebar-mode">
+        <h3 class="sidebar-h">Mode</h3>
+        <div class="mode-toggle" role="radiogroup" aria-label="Tracking mode">
+          <button type="button" class="mode-opt" data-mode="cigarette" role="radio" aria-checked="true">
+            <span class="mode-opt-emoji" aria-hidden="true">🚬</span>
+            <span class="mode-opt-label">Cigarette</span>
+          </button>
+          <button type="button" class="mode-opt" data-mode="joint" role="radio" aria-checked="false">
+            <span class="mode-opt-emoji" aria-hidden="true">🌿</span>
+            <span class="mode-opt-label">Joint</span>
+          </button>
+          <span class="mode-thumb" aria-hidden="true"></span>
+        </div>
+      </div>
       <div class="sidebar-stats">
-        <h3 class="sidebar-h">Your stats</h3>
+        <h3 class="sidebar-h" id="sb-stats-h">Cigarette stats</h3>
         <dl class="sidebar-dl">
           <div class="stat-row"><dt>Today</dt><dd id="sb-today">0</dd></div>
-          <div class="stat-row"><dt>Cigs your lungs skipped</dt><dd id="sb-avoided">0</dd></div>
+          <div class="stat-row"><dt id="sb-avoided-label">Cigs your lungs skipped</dt><dd id="sb-avoided">0</dd></div>
           <div class="stat-row"><dt>Saved by cutting back</dt><dd id="sb-saved">$0.00</dd></div>
           <div class="stat-row"><dt>Streak under limit</dt><dd id="sb-streak">0 d</dd></div>
         </dl>
@@ -154,13 +174,13 @@
 
     <dialog id="settings-dialog" class="settings-dialog">
       <form id="settings-form" method="dialog">
-        <h2>Settings</h2>
+        <h2 id="settings-h">Cigarette settings</h2>
         <label>
-          Daily limit (cigarettes)
+          <span id="lbl-limit">Daily limit (cigarettes)</span>
           <input id="f-limit" type="number" min="0" step="1" inputmode="numeric" />
         </label>
         <label>
-          Cost per cigarette
+          <span id="lbl-cost">Cost per cigarette</span>
           <input id="f-cost" type="number" min="0" step="0.01" inputmode="decimal" />
         </label>
         <label>
@@ -168,11 +188,11 @@
           <input id="f-currency" type="text" maxlength="3" />
         </label>
         <label>
-          Baseline cigs/day (your "before")
+          <span id="lbl-baseline">Baseline cigs/day (your "before")</span>
           <input id="f-baseline" type="number" min="0" step="1" inputmode="numeric" />
         </label>
         <div class="settings-actions">
-          <button type="button" id="reset-btn" class="danger">Reset all data</button>
+          <button type="button" id="reset-btn" class="danger">Reset this mode</button>
           <div class="spacer"></div>
           <button type="button" id="settings-close">Cancel</button>
           <button type="submit" class="primary">Save</button>

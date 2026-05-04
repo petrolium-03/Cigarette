@@ -5,6 +5,9 @@ import {
   removeLast,
   updateSettings,
   markBadgesSeen,
+  loadActiveMode,
+  saveActiveMode,
+  resetMode,
 } from "./state.js";
 import {
   countForDay,
@@ -14,10 +17,13 @@ import {
   cigsAvoided,
   streakUnderLimit,
 } from "./stats.js";
-import { BADGES, evaluate } from "./badges.js";
+import { BADGES, evaluate, blurbText } from "./badges.js";
 import { drawBarChart } from "./chart.js";
+import { getMode } from "./modes.js";
 
-const state = load();
+let activeModeId = loadActiveMode();
+let mode = getMode(activeModeId);
+let state = load(activeModeId);
 let currentRange = "week";
 
 const $ = (sel) => document.querySelector(sel);
@@ -29,6 +35,7 @@ const els = {
   limitBar: $("#limit-bar"),
   logBtn: $("#log-btn"),
   cigGroup: $(".cig"),
+  actionSub: $("#action-sub"),
   undoBtn: $("#undo-btn"),
   undoLabel: $("#undo-label"),
   rangeTabs: document.querySelectorAll(".range-tab"),
@@ -38,6 +45,7 @@ const els = {
   chart: $("#chart"),
   costSaved: $("#cost-saved"),
   cigsAvoided: $("#cigs-avoided"),
+  impactAvoidedLabel: $("#impact-avoided-label"),
   streak: $("#streak"),
   badges: $("#badges"),
   toast: $("#toast"),
@@ -51,6 +59,10 @@ const els = {
   settingsDialog: $("#settings-dialog"),
   settingsClose: $("#settings-close"),
   settingsForm: $("#settings-form"),
+  settingsH: $("#settings-h"),
+  lblLimit: $("#lbl-limit"),
+  lblCost: $("#lbl-cost"),
+  lblBaseline: $("#lbl-baseline"),
   fLimit: $("#f-limit"),
   fCost: $("#f-cost"),
   fCurrency: $("#f-currency"),
@@ -60,11 +72,14 @@ const els = {
   sidebar: $("#sidebar"),
   sidebarBackdrop: $("#sidebar-backdrop"),
   sidebarClose: $("#sidebar-close"),
+  sbStatsH: $("#sb-stats-h"),
   sbToday: $("#sb-today"),
   sbAvoided: $("#sb-avoided"),
+  sbAvoidedLabel: $("#sb-avoided-label"),
   sbSaved: $("#sb-saved"),
   sbStreak: $("#sb-streak"),
   sbItems: document.querySelectorAll(".sb-item"),
+  modeOpts: document.querySelectorAll(".mode-opt"),
 };
 
 function fmtCurrency(n) {
@@ -80,6 +95,29 @@ function relTime(ts) {
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h ago`;
   return new Date(ts).toLocaleString();
+}
+
+function applyMode() {
+  // Sets the mode-dependent attribute (drives icon swap + thumb position)
+  // and updates all noun-bearing labels in one place.
+  document.documentElement.dataset.mode = activeModeId;
+  els.logBtn.setAttribute("aria-label", `Stub out a ${mode.singularNoun}`);
+  els.actionSub.textContent = mode.actionSub;
+  els.impactAvoidedLabel.textContent = `${mode.shortPlural} your lungs skipped`;
+  els.sbStatsH.textContent = `${mode.label} stats`;
+  els.sbAvoidedLabel.textContent = `${capitalize(mode.shortPlural)} your lungs skipped`;
+  els.settingsH.textContent = `${mode.label} settings`;
+  els.lblLimit.textContent = `Daily limit (${mode.pluralNoun})`;
+  els.lblCost.textContent = `Cost per ${mode.singularNoun}`;
+  els.lblBaseline.textContent = `Baseline ${mode.shortPlural}/day (your "before")`;
+  els.modeOpts.forEach((opt) => {
+    const isActive = opt.dataset.mode === activeModeId;
+    opt.setAttribute("aria-checked", String(isActive));
+  });
+}
+
+function capitalize(s) {
+  return s ? s[0].toUpperCase() + s.slice(1) : s;
 }
 
 function render() {
@@ -160,7 +198,7 @@ function renderBadges() {
 function showBadge(badge, earned) {
   els.badgeDEmoji.textContent = badge.emoji;
   els.badgeDName.textContent = badge.name;
-  els.badgeDBlurb.textContent = badge.blurb;
+  els.badgeDBlurb.textContent = blurbText(badge, mode);
   els.badgeDStatus.textContent = earned ? "Unlocked" : "Locked";
   els.badgeDialog.classList.toggle("unlocked", earned);
   els.badgeDialog.classList.toggle("locked", !earned);
@@ -179,16 +217,26 @@ function checkBadges() {
   if (!newly.length) return;
   markBadgesSeen(state, newly.map((b) => b.id));
   newly.forEach((b, i) => {
-    setTimeout(() => toast(`${b.name} unlocked! ${b.blurb}`, b.emoji), i * 600);
+    setTimeout(() => toast(`${b.name} unlocked! ${blurbText(b, mode)}`, b.emoji), i * 600);
   });
 }
 
 function triggerStubAnimation() {
   els.logBtn.classList.remove("stubbing");
-  // Force a reflow so the animation restarts cleanly on rapid taps.
-  // Reading offsetWidth is the reliable cross-browser way.
   void els.logBtn.offsetWidth;
   els.logBtn.classList.add("stubbing");
+}
+
+function switchMode(newModeId) {
+  if (newModeId === activeModeId || !getMode(newModeId)) return;
+  activeModeId = newModeId;
+  mode = getMode(newModeId);
+  saveActiveMode(newModeId);
+  state = load(newModeId);
+  applyMode();
+  render();
+  checkBadges();
+  toast(`Switched to ${mode.label} mode`, mode.emoji);
 }
 
 els.logBtn.addEventListener("animationend", (e) => {
@@ -221,7 +269,6 @@ els.rangeTabs.forEach((tab) => {
 
 els.badgeClose.addEventListener("click", () => els.badgeDialog.close());
 els.badgeDialog.addEventListener("click", (e) => {
-  // Click on backdrop closes
   const r = els.badgeDialog.getBoundingClientRect();
   if (
     e.clientX < r.left || e.clientX > r.right ||
@@ -255,9 +302,10 @@ els.settingsForm.addEventListener("submit", (e) => {
 });
 
 els.resetBtn.addEventListener("click", () => {
-  if (!confirm("Erase all logs and settings? This cannot be undone.")) return;
-  localStorage.removeItem("cigtracker.v1");
-  location.reload();
+  if (!confirm(`Erase all ${mode.label.toLowerCase()} mode data? This cannot be undone.`)) return;
+  resetMode(activeModeId);
+  state = load(activeModeId);
+  render();
 });
 
 function openSidebar() {
@@ -296,10 +344,17 @@ els.sbItems.forEach((b) => {
   });
 });
 
+els.modeOpts.forEach((opt) => {
+  opt.addEventListener("click", () => {
+    switchMode(opt.dataset.mode);
+  });
+});
+
 setInterval(() => {
   if (state.log.length) render();
 }, 30_000);
 
+applyMode();
 render();
 
 if ("serviceWorker" in navigator) {

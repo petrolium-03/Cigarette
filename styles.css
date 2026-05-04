@@ -201,6 +201,22 @@ main {
 .cig-filter { fill: var(--filter); }
 .cig-line { stroke: rgba(120,80,30,0.6); stroke-width: 1; }
 .cig-ash { fill: var(--ash); opacity: 0.85; }
+
+.cig-cigarette { display: inline; }
+.cig-joint { display: none; }
+[data-mode="joint"] .cig-cigarette { display: none; }
+[data-mode="joint"] .cig-joint { display: inline; }
+.joint-body {
+  fill: #f5edd1;
+  stroke: #cdbf90;
+  stroke-width: 0.6;
+}
+.joint-twist {
+  stroke: #b3a06b;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  fill: none;
+}
 .cig-ember {
   fill: var(--ember);
   filter: drop-shadow(0 0 6px rgba(255, 90, 60, 0.7));
@@ -648,8 +664,60 @@ main {
   padding: 8px 8px 0;
 }
 
-.sidebar-stats {
+.sidebar-mode {
   padding: 0 20px 16px;
+}
+.mode-toggle {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 4px;
+  isolation: isolate;
+}
+.mode-opt {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 4px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.mode-opt[aria-checked="true"] {
+  color: var(--text);
+}
+.mode-opt-emoji { font-size: 16px; line-height: 1; }
+.mode-thumb {
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  background: var(--surface);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: transform 0.22s cubic-bezier(0.32, 0.72, 0.24, 1);
+}
+[data-mode="joint"] .mode-thumb {
+  transform: translateX(100%);
+}
+
+.sidebar-stats {
+  padding: 16px 20px 16px;
+  border-top: 1px solid var(--surface-2);
   border-bottom: 1px solid var(--surface-2);
 }
 .sidebar-h {
@@ -711,7 +779,8 @@ main {
 
 @media (prefers-reduced-motion: reduce) {
   .sidebar,
-  .sidebar-backdrop {
+  .sidebar-backdrop,
+  .mode-thumb {
     transition: none;
   }
 }
