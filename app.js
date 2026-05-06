@@ -9,6 +9,7 @@ import {
   saveActiveMode,
   resetMode,
   addPack,
+  removeLastPack,
 } from "./state.js";
 import {
   countForDay,
@@ -65,11 +66,8 @@ const els = {
   settingsForm: $("#settings-form"),
   settingsH: $("#settings-h"),
   lblLimit: $("#lbl-limit"),
-  lblCost: $("#lbl-cost"),
   lblBaseline: $("#lbl-baseline"),
   fLimit: $("#f-limit"),
-  fCost: $("#f-cost"),
-  fCurrency: $("#f-currency"),
   fBaseline: $("#f-baseline"),
   resetBtn: $("#reset-btn"),
   menuBtn: $("#menu-btn"),
@@ -100,6 +98,7 @@ const els = {
   packUnit: $("#pack-unit"),
   packRate: $("#pack-rate"),
   packRateNoun: $("#pack-rate-noun"),
+  packUndo: $("#pack-undo"),
 };
 
 function fmtCurrency(n) {
@@ -128,7 +127,6 @@ function applyMode() {
   els.sbAvoidedLabel.textContent = `${capitalize(mode.shortPlural)} your lungs skipped`;
   els.settingsH.textContent = `${mode.label} settings`;
   els.lblLimit.textContent = `Daily limit (${mode.pluralNoun})`;
-  els.lblCost.textContent = `Cost per ${mode.singularNoun}`;
   els.lblBaseline.textContent = `Baseline ${mode.shortPlural}/day (your "before")`;
   els.packBtnLabel.textContent = mode.purchaseLabel;
   els.packH.textContent = mode.purchaseTitle;
@@ -319,8 +317,6 @@ els.badgeDialog.addEventListener("click", (e) => {
 
 els.settingsBtn.addEventListener("click", () => {
   els.fLimit.value = state.settings.dailyLimit;
-  els.fCost.value = state.settings.costPerCig;
-  els.fCurrency.value = state.settings.currency;
   els.fBaseline.value = state.settings.baselinePerDay;
   els.settingsDialog.showModal();
 });
@@ -331,8 +327,6 @@ els.settingsForm.addEventListener("submit", (e) => {
   e.preventDefault();
   updateSettings(state, {
     dailyLimit: Math.max(0, parseInt(els.fLimit.value, 10) || 0),
-    costPerCig: Math.max(0, parseFloat(els.fCost.value) || 0),
-    currency: els.fCurrency.value.trim().slice(0, 3) || "$",
     baselinePerDay: Math.max(0, parseInt(els.fBaseline.value, 10) || 0),
   });
   els.settingsDialog.close();
@@ -423,6 +417,16 @@ els.packDialog.addEventListener("click", (e) => {
   ) {
     els.packDialog.close();
   }
+});
+
+els.packUndo.addEventListener("click", () => {
+  const removed = removeLastPack(state);
+  if (!removed) return;
+  render();
+  toast(
+    `Removed ${mode.purchaseUnit} (${fmtCurrency(removed.cost)}, ${removed.count} ${mode.pluralNoun})`,
+    "↶"
+  );
 });
 
 setInterval(() => {

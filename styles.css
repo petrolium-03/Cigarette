@@ -372,10 +372,39 @@ main {
   font-size: 13px;
   color: var(--muted);
   line-height: 1.4;
+  flex: 1;
 }
 .pack-summary-text strong {
   color: var(--text);
   font-variant-numeric: tabular-nums;
+}
+
+.pack-undo-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.pack-undo-btn:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.settings-hint {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
 }
 
 .pack-help {

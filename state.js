@@ -120,6 +120,13 @@ export function addPack(state, { count, cost, ts = Date.now() }) {
   save(state);
 }
 
+export function removeLastPack(state) {
+  if (!Array.isArray(state.packs) || !state.packs.length) return null;
+  const removed = state.packs.pop();
+  save(state);
+  return removed;
+}
+
 export function resetMode(modeId) {
   localStorage.removeItem(modeKey(modeId));
 }

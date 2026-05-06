@@ -83,6 +83,13 @@
           on <span id="pack-count">0</span>&nbsp;<span id="pack-unit">packs</span>
           · <strong id="pack-rate">$0.00</strong>/<span id="pack-rate-noun">cig</span>
         </div>
+        <button
+          type="button"
+          id="pack-undo"
+          class="pack-undo-btn"
+          aria-label="Undo last pack purchase"
+          title="Undo last pack"
+        >↶</button>
       </section>
 
       <section class="stats-card">
@@ -208,17 +215,10 @@
     <dialog id="settings-dialog" class="settings-dialog">
       <form id="settings-form" method="dialog">
         <h2 id="settings-h">Cigarette settings</h2>
+        <p class="settings-hint">Cost data comes from your pack purchases — tap "I bought a pack" on the main screen to log one.</p>
         <label>
           <span id="lbl-limit">Daily limit (cigarettes)</span>
           <input id="f-limit" type="number" min="0" step="1" inputmode="numeric" />
-        </label>
-        <label>
-          <span id="lbl-cost">Cost per cigarette</span>
-          <input id="f-cost" type="number" min="0" step="0.01" inputmode="decimal" />
-        </label>
-        <label>
-          Currency symbol
-          <input id="f-currency" type="text" maxlength="3" />
         </label>
         <label>
           <span id="lbl-baseline">Baseline cigs/day (your "before")</span>
