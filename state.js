@@ -130,3 +130,11 @@ export function removeLastPack(state) {
 export function resetMode(modeId) {
   localStorage.removeItem(modeKey(modeId));
 }
+
+export function factoryReset() {
+  // Allowlist the keys we own so unrelated localStorage entries on the same
+  // origin are never touched.
+  const keys = [LEGACY_KEY, MODE_KEY];
+  for (const m of Object.keys(MODES)) keys.push(modeKey(m));
+  for (const k of keys) localStorage.removeItem(k);
+}

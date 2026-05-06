@@ -8,6 +8,7 @@ import {
   loadActiveMode,
   saveActiveMode,
   resetMode,
+  factoryReset,
   addPack,
   removeLastPack,
 } from "./state.js";
@@ -70,6 +71,7 @@ const els = {
   fLimit: $("#f-limit"),
   fBaseline: $("#f-baseline"),
   resetBtn: $("#reset-btn"),
+  factoryResetBtn: $("#factory-reset-btn"),
   menuBtn: $("#menu-btn"),
   sidebar: $("#sidebar"),
   sidebarBackdrop: $("#sidebar-backdrop"),
@@ -338,7 +340,20 @@ els.resetBtn.addEventListener("click", () => {
   if (!confirm(`Erase all ${mode.label.toLowerCase()} mode data? This cannot be undone.`)) return;
   resetMode(activeModeId);
   state = load(activeModeId);
+  els.settingsDialog.close();
   render();
+});
+
+els.factoryResetBtn.addEventListener("click", () => {
+  if (
+    !confirm(
+      "Wipe ALL data — both Cigarette and Joint modes, all packs, all badges, and your mode preference? This cannot be undone."
+    )
+  ) {
+    return;
+  }
+  factoryReset();
+  location.reload();
 });
 
 function openSidebar() {
