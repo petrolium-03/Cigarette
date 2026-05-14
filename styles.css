@@ -561,7 +561,7 @@ main {
   opacity: 0;
   pointer-events: none;
   transition: transform 0.3s ease, opacity 0.3s ease;
-  z-index: 100;
+  z-index: 250;
 }
 .toast.show {
   transform: translate(-50%, 0);

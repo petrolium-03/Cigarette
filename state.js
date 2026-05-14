@@ -25,11 +25,18 @@ function migrateLegacy() {
   const legacy = localStorage.getItem(LEGACY_KEY);
   if (!legacy) return;
   const newKey = modeKey("cigarette");
-  if (localStorage.getItem(newKey) !== null) return;
-  // Skip migrating if the legacy value happens to look like the new key
-  // (it's the same string here, but keep the guard for safety).
+  if (localStorage.getItem(newKey) !== null) {
+    // Modern key already exists — legacy is stale. Drop it so a later
+    // resetMode() can't accidentally resurrect old data via this path.
+    localStorage.removeItem(LEGACY_KEY);
+    return;
+  }
   if (newKey === LEGACY_KEY) return;
   localStorage.setItem(newKey, legacy);
+  // Migration done. Without this removal, hitting "Reset this mode" for
+  // cigarette would delete the modern key and the next load() would
+  // copy the legacy data right back in.
+  localStorage.removeItem(LEGACY_KEY);
 }
 
 function migrateState(parsed, modeId) {

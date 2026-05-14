@@ -255,9 +255,15 @@ function checkBadges() {
   const newly = evaluate(state);
   if (!newly.length) return;
   markBadgesSeen(state, newly.map((b) => b.id));
-  newly.forEach((b, i) => {
-    setTimeout(() => toast(`${b.name} unlocked! ${blurbText(b, mode)}`, b.emoji), i * 600);
-  });
+  // Flip the just-unlocked badges from grey to colour right away so
+  // the toast and the badge state are visually consistent.
+  renderBadges();
+  if (newly.length === 1) {
+    const b = newly[0];
+    toast(`${b.name} unlocked! ${blurbText(b, mode)}`, b.emoji);
+  } else {
+    toast(`${newly.length} milestones unlocked!`, "🎉");
+  }
 }
 
 function triggerStubAnimation() {
